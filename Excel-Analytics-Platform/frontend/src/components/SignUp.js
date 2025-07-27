@@ -28,7 +28,7 @@ const SignUp = () => {
     try {
       const res = await axios.post("http://localhost:5000/api/auth/signup", { username, password, email, role })
       localStorage.setItem("token", res.data.token)
-      navigate("/dashboard") // Default to dashboard for all users
+      navigate("/login") // Default to dashboard for all users
     } catch (error) {
       setError(error.response?.data?.msg || "Sign up failed. Please try again.")
     } finally {
