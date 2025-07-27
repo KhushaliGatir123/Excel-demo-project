@@ -6,7 +6,7 @@ import { useNavigate, Link } from "react-router-dom"
 import jwtDecode from "jwt-decode"
 
 const Login = () => {
-  const [username, setUsername] = useState("")
+  const [username, setUsername] = useState("") // Input username and will be updated with fetched username
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -28,8 +28,40 @@ const Login = () => {
 
     try {
       const res = await axios.post("http://localhost:5000/api/auth/login", { username, password })
-      localStorage.setItem("token", res.data.token)
-      navigate("/dashboard") // Default to dashboard for all users
+      const token = res.data.token
+      localStorage.setItem("token", token)
+
+      // Decode the token to get the username and role, mimicking UserDashboard logic
+      const decoded = jwtDecode(token)
+      console.log("=== JWT TOKEN DEBUG ===")
+      console.log("Full decoded token:", decoded)
+      console.log("decoded.user:", decoded.user)
+      console.log("decoded.user?.username:", decoded.user?.username)
+      console.log("decoded.username:", decoded.username)
+      console.log("decoded.user?.name:", decoded.user?.name)
+      console.log("decoded.name:", decoded.name)
+      console.log("========================")
+
+      // Extract username with multiple fallback options
+      const fetchedUsername =
+        decoded.user?.username || decoded.username || decoded.user?.name || decoded.name || username
+      console.log("Final extracted username:", fetchedUsername)
+
+      // Update state with fetched username
+      setUsername(fetchedUsername)
+      localStorage.setItem("username", fetchedUsername)
+
+      // Decode the token to get the role
+      const role = decoded.user?.role || decoded.role
+
+      // Redirect based on role with a slight delay to show the updated username
+      setTimeout(() => {
+        if (role === "admin") {
+          navigate("/admin")
+        } else {
+          navigate("/dashboard")
+        }
+      }, 100) // Small delay to allow re-render with fetched username
     } catch (error) {
       setError(error.response?.data?.msg || "Login failed. Please try again.")
     } finally {
@@ -71,7 +103,9 @@ const Login = () => {
       <div className="absolute inset-0 flex items-center justify-center" style={{ background: "radial-gradient(circle at center, rgba(66,61,128,0.2) 0%, transparent 70%)" }} />
       <div className="relative z-10 w-full max-w-md">
         <div className="bg-[#0F0F2A]/90 backdrop-blur-lg rounded-xl p-8 border border-[#423D80]/50 transition-all duration-500 hover:scale-[1.02]" style={{ boxShadow: `0 0 0 1px rgba(66, 61, 128, 0.3), 0 4px 8px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(43, 44, 91, 0.4), 0 16px 32px rgba(43, 44, 91, 0.3), 0 32px 64px rgba(15, 15, 42, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 80px rgba(66, 61, 128, 0.15)` }}>
-          <h2 className="text-3xl font-extrabold text-white mb-8 text-center tracking-wide" style={{ textShadow: "0 4px 8px rgba(0, 0, 0, 0.5), 0 0 20px rgba(66, 61, 128, 0.3)" }}>Welcome Back</h2>
+          <h2 className="text-3xl font-extrabold text-white mb-8 text-center tracking-wide" style={{ textShadow: "0 4px 8px rgba(0, 0, 0, 0.5), 0 0 20px rgba(66, 61, 128, 0.3)" }}>
+            Welcome Back, {username.charAt(0).toUpperCase() + username.slice(1) || "User"} {/* Capitalize first letter */}
+          </h2>
           {error && <div className="bg-red-500/20 border border-red-500/50 text-red-300 p-4 rounded-lg mb-6 backdrop-blur-sm">{error}</div>}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>

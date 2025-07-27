@@ -1,5 +1,3 @@
-"use client"
-
 import React, { useState, useEffect, useRef } from "react"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
@@ -83,6 +81,10 @@ const UserDashboard = () => {
 
         console.log("Extracted username:", extractedUsername) // Debug log
         setUsername(extractedUsername)
+
+        
+        const fetchedUsername = localStorage.getItem("username") || "User"
+        setUsername(fetchedUsername)
 
         const [filesRes, graphsRes] = await Promise.all([
           axios.get("http://localhost:5000/api/files", {
