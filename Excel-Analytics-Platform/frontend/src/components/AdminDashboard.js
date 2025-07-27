@@ -45,17 +45,20 @@ const AdminDashboard = () => {
   const handleDeleteUser = async (userId) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
-        const token = localStorage.getItem("adminToken")
+        const token = localStorage.getItem("adminToken");
         await axios.delete(`http://localhost:5000/api/admin/users/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
-        })
-        setUsers(users.filter((user) => user._id !== userId))
-        toast.success("User deleted successfully")
+        });
+        toast.success("User deleted successfully");
+
+        // ✅ Re-fetch fresh data
+        await fetchAdminData();
       } catch (error) {
-        toast.error("Failed to delete user: " + (error.response?.data?.msg || error.message))
+        toast.error("Failed to delete user: " + (error.response?.data?.msg || error.message));
       }
     }
-  }
+  };
+
 
   const handleToggleStatus = async (userId) => {
     try {
